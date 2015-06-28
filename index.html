@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Introduction to R (session 2) by smitherz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Introduction to R (session 2)</h1>
+      <h2 class="project-tagline"></h2>
+      <a href="https://github.com/smitherz/intro2R_session2" class="btn">View on GitHub</a>
+      <a href="https://github.com/smitherz/intro2R_session2/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/smitherz/intro2R_session2/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h2>
+<a id="goals-for-session" class="anchor" href="#goals-for-session" aria-hidden="true"><span class="octicon octicon-link"></span></a>Goals for Session</h2>
+
+<ul>
+<li>Build a few plots available in base R.</li>
+<li>Run a statistical test or two.</li>
+</ul>
+
+<p>Last session we imported data, performed some cleaning and modification to the data, then exported the new data frame as a .csv file.  Today we'll learn some plotting basics and run a statistical analysis or two.  Let's begin by loading data objects created in our last session.  This should be as simple as running your R script "Intro2R_session1.R".  There are multiple ways to do this, we'll use the  <code>source()</code> function.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># First clear your work environment</span>
+rm(<span class="pl-v">list</span> <span class="pl-k">=</span> ls())
+
+<span class="pl-c"># Run your script</span>
+source(<span class="pl-s"><span class="pl-pds">"</span>Intro2R_session1.R<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>Now we have our <code>Environment</code> populated with objects from last session.  Let's begin with a simple scatter plot.</p>
+
+<h2>
+<a id="scatter-plot" class="anchor" href="#scatter-plot" aria-hidden="true"><span class="octicon octicon-link"></span></a>Scatter Plot</h2>
+
+<p>Scatter plots are a very widely used plot type.  The function for a scatter plot is of the form <code>plot(x, y, arg1, arg2, ...)</code>.  Basic requirements of <code>plot()</code> are the x and y variables.  Remember, if you need help on a particular function enter <code>?function_name</code> in the console.  OK, let's make a scatter plot of dissolved organic carbon (DOC) vs. wetland extent.  First, assign values for the x and y variables.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Assign values to x and y</span>
+<span class="pl-smi">x</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">streamDOC</span><span class="pl-k">$</span><span class="pl-smi">Wet</span>
+<span class="pl-smi">y</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">streamDOC</span><span class="pl-k">$</span><span class="pl-smi">logDOC</span></pre></div>
+
+<p>Now that we have defined x and y we can input them to <code>plot()</code> as arguments.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Plot y vs. x</span>
+plot(<span class="pl-smi">x</span>, <span class="pl-smi">y</span>)</pre></div>
+
+<p>Nice! a plot.  But the axes labeling can be improved, and we need a figure title.  These can be modified by sending additional arguments to <code>plot()</code>.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Add a title and axes labels</span>
+plot(<span class="pl-smi">x</span>, <span class="pl-smi">y</span>, <span class="pl-v">main</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Stream DOC as Function of Wetland Extent<span class="pl-pds">"</span></span>,
+     <span class="pl-v">xlab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Wetland Extent (fraction)<span class="pl-pds">"</span></span>, <span class="pl-v">ylab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>log(DOC) (mg/L)<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>Let's change wetland extent from fraction to percent.  We already calculated this and appended to the streamDOC data frame in session 1.  Reassign object x as percent wetland extent and adjust the arguments to the plot function accordingly.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Reassign x as percent wetland extent</span>
+<span class="pl-smi">x</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">streamDOC</span><span class="pl-k">$</span><span class="pl-smi">prcntWet</span>
+
+<span class="pl-c"># Plot and change the title and x-label</span>
+plot(<span class="pl-smi">x</span>, <span class="pl-smi">y</span>, <span class="pl-v">main</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Stream DOC as Function of Wetland Extent<span class="pl-pds">"</span></span>,
+     <span class="pl-v">xlab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Wetland Extent (%)<span class="pl-pds">"</span></span>, <span class="pl-v">ylab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>log(DOC) (mg/L)<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>Looks like there's a linear relationship here.  Let's explore it with a linear regression.  We'll use the linear regression function <code>lm()</code> and assign the output to object <code>reg1</code>.  We want to regress y against x, so ...</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Run a linear regression</span>
+<span class="pl-smi">reg1</span> <span class="pl-k">&lt;-</span> lm(<span class="pl-smi">y</span> <span class="pl-k">~</span> <span class="pl-smi">x</span>)</pre></div>
+
+<p>How well does this model fit the data?</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Get the output summary of the linear regression</span>
+summary(<span class="pl-smi">reg1</span>)</pre></div>
+
+<p>Looks pretty good.  Let's add the regression line to the figure.  Use the function <code>abline()</code>.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Replot</span>
+plot(<span class="pl-smi">x</span>, <span class="pl-smi">y</span>, <span class="pl-v">main</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Stream DOC as Function of Wetland Extent<span class="pl-pds">"</span></span>,
+     <span class="pl-v">xlab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Wetland Extent (%)<span class="pl-pds">"</span></span>, <span class="pl-v">ylab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>log(DOC) (mg/L)<span class="pl-pds">"</span></span>)
+
+<span class="pl-c"># Add the regression line to the plot</span>
+abline(<span class="pl-smi">reg1</span>)</pre></div>
+
+<p>Nice!  If you want to export this figure, go to the <code>plots</code> tab and click <code>Export &gt; Save As Image ...</code>.  This will pop-up a window in which you can dynamically set the dimensions of your figure and the specify the file type for export.</p>
+
+<p>Now suppose we want to revisit the plot of DOC vs wetland extent and distinguish data points associated with an upstream lake and those without an upstream lake.  First we would separate the "lake" and "no lake" data, but we already did this in our first session so we don't have to do that again.  So, next we'll plot log(DOC) vs. wetland extent for data with an upstream lake and make the data points black.  Then we'll add log(DOC) vs. wetland extent for data without an upstream lake, and make the points grey.  Note, this is done with the <code>points()</code> function.  What would happen if we used <code>plot()</code> again?  Finally, add a legend for clarity.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Plot data with an upstream lake</span>
+<span class="pl-smi">x</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">lake</span><span class="pl-k">$</span><span class="pl-smi">prcntWet</span>
+<span class="pl-smi">y</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">lake</span><span class="pl-k">$</span><span class="pl-smi">logDOC</span>
+plot(<span class="pl-smi">x</span>, <span class="pl-smi">y</span>, <span class="pl-v">pch</span> <span class="pl-k">=</span> <span class="pl-c1">16</span>, <span class="pl-v">col</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>black<span class="pl-pds">"</span></span>, <span class="pl-v">main</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Stream DOC as Function of Wetland Extent<span class="pl-pds">"</span></span>,
+     <span class="pl-v">xlab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Wetland Extent (%)<span class="pl-pds">"</span></span>, <span class="pl-v">ylab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>log(DOC) (mg/L)<span class="pl-pds">"</span></span>)
+
+<span class="pl-c"># Add points for data with no upstream lake</span>
+<span class="pl-smi">x</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">no.lake</span><span class="pl-k">$</span><span class="pl-smi">prcntWet</span>
+<span class="pl-smi">y</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">no.lake</span><span class="pl-k">$</span><span class="pl-smi">logDOC</span>
+points(<span class="pl-smi">x</span>, <span class="pl-smi">y</span>, <span class="pl-v">pch</span> <span class="pl-k">=</span> <span class="pl-c1">16</span>, <span class="pl-v">col</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>grey<span class="pl-pds">"</span></span>)
+
+<span class="pl-c"># Add a legend</span>
+legend(<span class="pl-s"><span class="pl-pds">"</span>topleft<span class="pl-pds">"</span></span>, <span class="pl-v">legend</span> <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>Lakes<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>No Lakes<span class="pl-pds">"</span></span>), <span class="pl-v">pch</span> <span class="pl-k">=</span> <span class="pl-c1">16</span>, <span class="pl-v">col</span> <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>grey<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>black<span class="pl-pds">"</span></span>))</pre></div>
+
+<h2>
+<a id="bar-plot" class="anchor" href="#bar-plot" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bar plot</h2>
+
+<p>Next up ... the bar plot.  Let's make a bar plot of average DOC for streams with and without an upstream lake.  The <code>barplot()</code> function is our friend.  Basic requirements of <code>barplot()</code> are data and data names.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Assign data.</span>
+<span class="pl-smi">dat</span> <span class="pl-k">&lt;-</span> c( mean(<span class="pl-smi">lake</span><span class="pl-k">$</span><span class="pl-smi">DOC</span>), mean(<span class="pl-smi">no.lake</span><span class="pl-k">$</span><span class="pl-smi">DOC</span>))
+
+<span class="pl-c"># Assign data names.</span>
+<span class="pl-smi">dat.names</span> <span class="pl-k">&lt;-</span> c( <span class="pl-s"><span class="pl-pds">"</span>Lake<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>No Lake<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>Check the calculated means.  Uh oh!.  A "NA"!  Where did this come from?  Take a look at lake$DOC.  Yep, a NA value in row 35.  This observation needs to be removed, as any calculation incorporating a NA value results in a NA output.  Let's employ the function <code>na.omit()</code> to remove the NA value.  In the context of data frames, <code>na.omit()</code> will remove all values in the same row as the NA, so use wisely!  OK, let's try it again.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Remove NA values and assign data</span>
+<span class="pl-smi">dat</span> <span class="pl-k">&lt;-</span> c( mean( na.omit(<span class="pl-smi">lake</span><span class="pl-k">$</span><span class="pl-smi">DOC</span>) ), mean(<span class="pl-smi">no.lake</span><span class="pl-k">$</span><span class="pl-smi">DOC</span>))</pre></div>
+
+<p>OK.  Where were we?  Ah yes, build the barplot and assign the appropriate title and axes labels.  Note <code>barplot()</code> has different argument requirements than <code>plot()</code>.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Plot data and assign labels</span>
+barplot(<span class="pl-v">height</span> <span class="pl-k">=</span> <span class="pl-smi">dat</span>, <span class="pl-v">names.arg</span> <span class="pl-k">=</span> <span class="pl-smi">dat.names</span>, <span class="pl-v">main</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Stream DOC, With and Without an Upstream Lake<span class="pl-pds">"</span></span>,
+        <span class="pl-v">ylab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>DOC (mg/L)<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>Hmmm ... perhaps this data could be better explored with a box plot.  Let's see.</p>
+
+<h2>
+<a id="boxplot" class="anchor" href="#boxplot" aria-hidden="true"><span class="octicon octicon-link"></span></a>Boxplot</h2>
+
+<p>The first argument of <code>boxplot()</code> asks for the y values to be plotted (in this case DOC concentration), followed by the tilde (i.e. '~'), then categorical information for the data (in this case "Lake" or "No Lake").  While we're at it, let's add a title and labels.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Plot data and assign labels</span>
+boxplot(<span class="pl-smi">streamDOC</span><span class="pl-k">$</span><span class="pl-smi">DOC</span> <span class="pl-k">~</span> <span class="pl-smi">streamDOC</span><span class="pl-k">$</span><span class="pl-smi">Type</span>, <span class="pl-v">names</span> <span class="pl-k">=</span> c (<span class="pl-s"><span class="pl-pds">"</span>Lake<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>No Lake<span class="pl-pds">"</span></span>),
+         <span class="pl-v">main</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Stream DOC, With and Without an Upstream Lake<span class="pl-pds">"</span></span>, <span class="pl-v">ylab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>DOC (mg/L)<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>This gives us a better idea of the data distributions.  Are these distributions statistically different?  Specifically are the means of these two distributions statistically different?  Let's find out with a t-test.</p>
+
+<h2>
+<a id="t-test" class="anchor" href="#t-test" aria-hidden="true"><span class="octicon octicon-link"></span></a>t-test</h2>
+
+<p>Like most functions, <code>t.test()</code> can be parameterized to accomodate different types of t-tests.  We'll run a basic "student's t-Test".  First assign x and y their respective values and run the test (x and y are the distributions for comparison).  Then run the t-test.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Assign values to x and y</span>
+<span class="pl-smi">x</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">lake</span><span class="pl-k">$</span><span class="pl-smi">DOC</span>
+<span class="pl-smi">y</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">no.lake</span><span class="pl-k">$</span><span class="pl-smi">DOC</span>
+
+<span class="pl-c"># Run the t-test</span>
+t.test(<span class="pl-smi">x</span>, <span class="pl-smi">y</span>)</pre></div>
+
+<p>Yep.  Looks like the means of our two distributions are statistically different.</p>
+
+<h2>
+<a id="grouped-bar-plots" class="anchor" href="#grouped-bar-plots" aria-hidden="true"><span class="octicon octicon-link"></span></a>Grouped Bar Plots</h2>
+
+<p>Grouped bar plots are a bit more complicated than regular bar plots, but can be quite useful for information that a regular bar plot can not.  For this example we'll generate some artificial data representing a relationship between coarse woody habitat (CWH) and landscape position.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Assign average values of CWH relative to high and low landscape position</span>
+<span class="pl-v">low</span> <span class="pl-k">=</span> c(<span class="pl-c1">82.5</span>, <span class="pl-c1">13.93</span>) <span class="pl-c"># Low landscape</span>
+<span class="pl-v">high</span> <span class="pl-k">=</span> c(<span class="pl-c1">36.07</span>, <span class="pl-c1">20.36</span>) <span class="pl-c"># High landscape</span></pre></div>
+
+<p>Next, let's bind these vectors along the column dimension using <code>cbind()</code>.  If we wanted to bind along the row dimension we'd use <code>rbind()</code>.  Also lets make a vector of names for the data.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Bind data along columns</span>
+<span class="pl-v">dat</span> <span class="pl-k">=</span> cbind(<span class="pl-smi">low</span>, <span class="pl-smi">high</span>)
+
+<span class="pl-c"># Name data</span>
+<span class="pl-v">dat.names</span> <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>Low<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>High<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>OK.  We're set.  Let's run <code>barplot()</code>.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Build barplot</span>
+barplot(<span class="pl-v">height</span> <span class="pl-k">=</span> <span class="pl-smi">dat</span>, <span class="pl-v">names.arg</span> <span class="pl-k">=</span> <span class="pl-smi">dat.names</span>, 
+        <span class="pl-v">ylab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>CWH (logs/km)<span class="pl-pds">"</span></span>, <span class="pl-v">xlab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Landscape Position<span class="pl-pds">"</span></span>, 
+        <span class="pl-v">legend.text</span> <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>Low Development<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>High Development<span class="pl-pds">"</span></span>))</pre></div>
+
+<p>Hmmmmmmm.  This plot could be improved.  Let's extend the y limits and place the "high development" and "low development" bars along side one another.  This can be done with the <code>ylim</code> and <code>besides</code> arguments.  Also, put a title on that figure!</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Rebuild barplot</span>
+barplot(<span class="pl-v">height</span> <span class="pl-k">=</span> <span class="pl-smi">dat</span>, <span class="pl-v">names.arg</span> <span class="pl-k">=</span> <span class="pl-smi">dat.names</span>, <span class="pl-v">beside</span> <span class="pl-k">=</span> <span class="pl-c1">TRUE</span>, <span class="pl-v">ylim</span> <span class="pl-k">=</span> c(<span class="pl-c1">0</span>, <span class="pl-c1">100</span>), 
+        <span class="pl-v">ylab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span># logs/km<span class="pl-pds">"</span></span>, <span class="pl-v">xlab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Landscape Position<span class="pl-pds">"</span></span>, 
+        <span class="pl-v">legend.text</span> <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>Low Development<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>High Development<span class="pl-pds">"</span></span>))</pre></div>
+
+<p>Yeah, that's nice.  OK, time for one last plot.</p>
+
+<h2>
+<a id="line-plot" class="anchor" href="#line-plot" aria-hidden="true"><span class="octicon octicon-link"></span></a>Line plot</h2>
+
+<p>Let's build a time series line plot of rainbow smelt and yellow perch densities in Crystal Lake from the North Temperate Lakes Long Term Ecological Research data set.  First read in the data from the file "fishCR.csv" and look at the data structure.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Read in the data</span>
+<span class="pl-smi">fishCR</span> <span class="pl-k">&lt;-</span> read.csv(<span class="pl-s"><span class="pl-pds">"</span>fishCR.csv<span class="pl-pds">"</span></span>)
+
+<span class="pl-c"># Look at the data structure</span>
+str(<span class="pl-smi">fishCR</span>)</pre></div>
+
+<p>For reasons similar to the lake/no-lake plot we built earlier, we will first plot the smelt series then add the perch series.  We'll use the argument <code>type = "l"</code> to get the function to output a line (as opposed to points), and the <code>col = "color"</code> argument to color the lines.  Then we'll add the perch series with the <code>lines()</code> function.  Finally, we'll add a legend.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Assign values to x and y for smelt data</span>
+<span class="pl-smi">x</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">fishCR</span><span class="pl-k">$</span><span class="pl-smi">Year</span>
+<span class="pl-smi">y</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">fishCR</span><span class="pl-k">$</span><span class="pl-smi">RS_per_year</span>
+
+<span class="pl-c"># Plot smelt time series</span>
+plot(<span class="pl-smi">x</span>, <span class="pl-smi">y</span>, <span class="pl-v">type</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>l<span class="pl-pds">"</span></span>, <span class="pl-v">col</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>blue<span class="pl-pds">"</span></span>, <span class="pl-v">main</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Crystal Lake Smelt and Perch Populations<span class="pl-pds">"</span></span>,
+     <span class="pl-v">ylab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Catch (#)<span class="pl-pds">"</span></span>, <span class="pl-v">xlab</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Year<span class="pl-pds">"</span></span>)
+
+<span class="pl-c"># Assign values to x and y for perch data</span>
+<span class="pl-smi">x</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">fishCR</span><span class="pl-k">$</span><span class="pl-smi">Year</span>
+<span class="pl-smi">y</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">fishCR</span><span class="pl-k">$</span><span class="pl-smi">YP_per_year</span>
+
+<span class="pl-c"># Add the perch line series</span>
+lines(<span class="pl-smi">fishCR</span><span class="pl-k">$</span><span class="pl-smi">Year</span>, <span class="pl-smi">fishCR</span><span class="pl-k">$</span><span class="pl-smi">YP_per_year</span>, <span class="pl-v">col</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>red<span class="pl-pds">"</span></span>)
+
+<span class="pl-c"># Add a legend.</span>
+legend(<span class="pl-s"><span class="pl-pds">"</span>topleft<span class="pl-pds">"</span></span>, <span class="pl-v">legend</span> <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>Rainbow Smelt<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Yellow Perch<span class="pl-pds">"</span></span>), 
+       <span class="pl-v">col</span> <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>blue<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>red<span class="pl-pds">"</span></span>), <span class="pl-v">lty</span> <span class="pl-k">=</span> <span class="pl-c1">1</span>, <span class="pl-v">bty</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>n<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>Nice job!  </p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/smitherz/intro2R_session2">Introduction to R (session 2)</a> is maintained by <a href="https://github.com/smitherz">smitherz</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
+
